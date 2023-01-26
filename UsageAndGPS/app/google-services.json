@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "825696743509",
+    "project_id": "usageandgps",
+    "storage_bucket": "usageandgps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825696743509:android:7b02856ac4c124c336a4dc",
+        "android_client_info": {
+          "package_name": "com.example.usageandgps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "825696743509-jgjsa2kc28smh2q2lngbcefe8i2tp976.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrmIXaMwVYXSKjxXwVtSo-3G58hhzcn7U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "825696743509-jgjsa2kc28smh2q2lngbcefe8i2tp976.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
