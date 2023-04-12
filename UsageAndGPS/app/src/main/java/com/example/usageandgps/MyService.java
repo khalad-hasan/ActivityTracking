@@ -1,5 +1,7 @@
 package com.example.usageandgps;
 
+import static com.example.usageandgps.MainActivity.participationID;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -14,12 +16,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -32,8 +38,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -43,18 +51,20 @@ public class MyService extends Service {
     private LocationListener locationListener;
     private boolean running = true;
     private static final String TAG = MyService.class.getSimpleName();
-    private Timer timer;
-    private TimerTask timerTask;
     private String locationString;
     private DatabaseReference mDatabase;
     private UsageStatsManager mUsageStatsManager;
     private final HashMap<String, String> map = new HashMap<>();
     String data;
-
+    public static int tripCount = 0;
+    public static List<String> tripTimes = new ArrayList<>();
+    Location oldLocation;
+    String provider;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        data = intent.getStringExtra("participationID");
+        final String[] formattedTime = new String[1];
+        data = participationID.getText().toString();
         Log.d(TAG, "Service started");
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mUsageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
@@ -62,10 +72,67 @@ public class MyService extends Service {
             startMyOwnForeground();
         }
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        provider = locationManager.getBestProvider(criteria, true);
         locationListener = new LocationListener() {
+            private final Handler handler = new Handler(Looper.getMainLooper());
+            private Runnable tripRunnable;
+            private Location potentialTripLocation;
+
             @Override
             public void onLocationChanged(Location location) {
-                // no-op
+                LocalTime timeLocal = null;
+                DateTimeFormatter formatter = null;
+                if (location != null && location.getAccuracy() < 20) {
+                    if (oldLocation == null) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            timeLocal = LocalTime.now();
+                            formatter = DateTimeFormatter.ofPattern("HH:mm");
+                            formattedTime[0] = timeLocal.format(formatter);
+                        }
+                        oldLocation = new Location(location);
+                    }
+                    if (oldLocation.distanceTo(location) > 30) {
+                        if (potentialTripLocation == null) {
+                            potentialTripLocation = new Location(location);
+                            System.out.println("Trip started - Potential");
+                            startTripTimer();
+                        } else if (potentialTripLocation.distanceTo(location) > 15) {
+                            potentialTripLocation.set(location);
+                            System.out.println("Trip exceeded limit for 15 meters - Potential");
+                            resetTripTimer();
+                        }
+                    } else {
+                        System.out.println("Trip cancelled - 30 meters down");
+                        resetTripTimer();
+                    }
+                    System.out.println(oldLocation.distanceTo(location));
+                } else {
+                    System.out.println("location is null");
+                }
+            }
+
+            private void startTripTimer() {
+                tripRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("Trip counted + 1:" + tripCount);
+                        tripTimes.add(formattedTime[0]);
+                        tripCount++;
+                        oldLocation = null;
+                        potentialTripLocation = null;
+                    }
+                };
+                handler.postDelayed(tripRunnable, 60 * 1000);
+            }
+
+            private void resetTripTimer() {
+                if (tripRunnable != null) {
+                    handler.removeCallbacks(tripRunnable);
+                    potentialTripLocation = null;
+                }
             }
 
             @Override
@@ -107,18 +174,19 @@ public class MyService extends Service {
         startForeground(2, notification);
     }
 
+
     private void startTrackingAppUsage() {
-        timer = new Timer();
-        timerTask = new TimerTask() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(provider, 1000, 1, locationListener);
+        }
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
                 checkAppUsage();
             }
         };
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        }
         timer.schedule(timerTask, 0, 1000);
     }
 

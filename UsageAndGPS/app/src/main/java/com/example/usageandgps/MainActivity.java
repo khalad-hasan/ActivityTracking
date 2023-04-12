@@ -1,5 +1,6 @@
 package com.example.usageandgps;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -23,29 +24,55 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     private static final String SERVICE_CLASS_NAME = "com.example.usageandgps.MyService";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-
+    private DatabaseReference mDatabase;
     @SuppressLint("StaticFieldLeak")
     public static EditText participationID;
-
+    private boolean check = false;
+    private ArrayList<Integer> codes = new ArrayList<>();
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         boolean isServiceRunning = isServiceRunning(this, SERVICE_CLASS_NAME);
         if (isServiceRunning) {
             Intent intent1 = new Intent(this, EndActivity.class);
             startActivity(intent1);
         }
 
+
         participationID = findViewById(R.id.ID);
+
+        mDatabase.child("ParticipationCodes").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                for(DataSnapshot child: dataSnapshot.getChildren()){
+                    codes.add(child.getValue(Integer.class));
+                }
+            }
+        });
+
     }
     public void buttonPressed(View v) {
-        requestUsageStatsPermission();
+        if(codes.contains(Integer.parseInt(participationID.getText().toString()))){
+            requestUsageStatsPermission();
+        }else{
+            Toast.makeText(this, "Participation Code is not correct. Please try again." , Toast.LENGTH_SHORT).show();
+        }
     }
 
     private static final int MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS = 100;
