@@ -158,21 +158,6 @@ This class is an Android activity which handles trip-related operations, like vi
 - `onCreate()`: This is the initialization callback of the activity. It sets up the layout and the views (like buttons and ListView), sets up the ListView adapter, and sets click listeners for the buttons.
 - `mergeSelectedTrips(List<String> selectedTripStartTimes)`: This method merges the selected trips if they are consecutive and there are at least two of them. The start time of the merged trip is the earliest start time among the selected trips. If the selected trips are not consecutive, it shows a toast message to inform the user. After merging, it removes the original selected trips from the list and adds the merged trip, then updates the ListView. It also shows a toast message to indicate whether the merging was successful.
 
-# Android Application: Trip Tracking
-
-This repository contains the source code for a trip tracking Android application. The application collects and displays data about trips, which can be edited and managed by the user.
-
-The app is structured around four primary classes: 
-
-1. `MainActivity`: This is the entry point of the application. It sets up the initial UI and initiates the tracking service.
-2. `EndActivity`: This class handles the termination of the trip tracking service and manages data persistence.
-3. `TripActivity`: This class provides a UI for managing individual trips tracked by the application.
-4. `TripListAdapter`: This class extends `ArrayAdapter<String>`. It's responsible for the customization of the ListView items in the `TripActivity` class.
-
-The following sections provide detailed documentation for each of these classes, including their constructors, methods, and key interactions.
-
-Please refer to the individual class documentations below for detailed understanding of their respective functionalities.
-
 # Note
 
 ## Participation Codes are from 0 to 19 included. You can change them in firebase accordingly. 
