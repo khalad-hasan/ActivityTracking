@@ -165,8 +165,8 @@ The current version of the application does not support background GPS tracking.
 
 # Note
 
-## Participation Codes are from 0 to 19 included. You can change them in firebase accordingly. 
-## Firebase link: https://console.firebase.google.com/u/0/project/usageandgps/database/usageandgps-default-rtdb/data 
+Participation Codes are from 0 to 19 included. You can change them in firebase accordingly.
+Firebase link: https://console.firebase.google.com/u/0/project/usageandgps/database/usageandgps-default-rtdb/data 
 
 For an access to Firebase, please contact me at alakbarzadenihad@gmail.com.
 
