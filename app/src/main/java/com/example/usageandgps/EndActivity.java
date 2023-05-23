@@ -41,18 +41,28 @@ public class EndActivity extends AppCompatActivity {
     private TextView textView;
     private String data;
     private int i = 0;
+    private Button btnEdit;
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_end);
         btn = findViewById(R.id.endButton);
+        btnEdit = findViewById(R.id.editTrip);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent serviceIntent = new Intent(getApplicationContext(), MyService.class);
                 stopService(serviceIntent);
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            }
+        });
+
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), TripActivity.class);
+                startActivity(intent);
             }
         });
         data = participationID.getText().toString();

@@ -2,6 +2,7 @@ package com.example.usageandgps;
 
 import static com.example.usageandgps.MainActivity.participationID;
 
+import android.os.PowerManager;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -44,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
 public class MyService extends Service {
 
     private LocationManager locationManager;
@@ -86,6 +86,10 @@ public class MyService extends Service {
                 LocalTime timeLocal = null;
                 DateTimeFormatter formatter = null;
                 if (location != null && location.getAccuracy() < 20) {
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    locationString = "Location: " + latitude + " / " + longitude;
+
                     if (oldLocation == null) {
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                             timeLocal = LocalTime.now();
@@ -94,7 +98,7 @@ public class MyService extends Service {
                         }
                         oldLocation = new Location(location);
                     }
-                    if (oldLocation.distanceTo(location) > 30) {
+                    if (oldLocation.distanceTo(location) > 5) {
                         if (potentialTripLocation == null) {
                             potentialTripLocation = new Location(location);
                             System.out.println("Trip started - Potential");
@@ -105,7 +109,7 @@ public class MyService extends Service {
                             resetTripTimer();
                         }
                     } else {
-                        System.out.println("Trip cancelled - 30 meters down");
+                        System.out.println("Trip cancelled - 5 meters down");
                         resetTripTimer();
                     }
                     System.out.println(oldLocation.distanceTo(location));
@@ -118,9 +122,9 @@ public class MyService extends Service {
                 tripRunnable = new Runnable() {
                     @Override
                     public void run() {
+                        tripCount++;
                         System.out.println("Trip counted + 1:" + tripCount);
                         tripTimes.add(formattedTime[0]);
-                        tripCount++;
                         oldLocation = null;
                         potentialTripLocation = null;
                     }
@@ -159,7 +163,7 @@ public class MyService extends Service {
     private void startMyOwnForeground() {
         String NOTIFICATION_CHANNEL_ID = "com.example.UBCCAAF";
         String channelName = "My Background Service";
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
         chan.setLightColor(Color.BLUE);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         NotificationManager manager = getSystemService(NotificationManager.class);
@@ -168,7 +172,7 @@ public class MyService extends Service {
         Notification notification = notificationBuilder.setOngoing(true)
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle("Usage and GPS tracking is running in background.")
-                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
         startForeground(2, notification);
@@ -236,6 +240,8 @@ public class MyService extends Service {
 
     }
 
+
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -250,6 +256,7 @@ public class MyService extends Service {
     public void onDestroy() {
         super.onDestroy();
         running = false;
+        MainActivity.releaseWakeLock();
         stopForeground(true);
         stopSelf();
     }
@@ -259,5 +266,6 @@ public class MyService extends Service {
         return null;
     }
 }
+
 
 
