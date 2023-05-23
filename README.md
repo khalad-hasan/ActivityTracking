@@ -134,7 +134,6 @@ This class is part of the Android Activity lifecycle. This specific `EndActivity
 - `textView`: A TextView object to display questions in the popup.
 - `timeForPop`: A string object to store the time at which the popup should be displayed.
 - `data`: A string object to store the participationID.
-- `i`: An integer variable, currently not being used.
 
 ## Methods
 
