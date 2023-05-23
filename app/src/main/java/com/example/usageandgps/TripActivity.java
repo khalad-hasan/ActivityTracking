@@ -17,8 +17,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class TripActivity extends AppCompatActivity {
+
+    // ListView that stores the trips
     private ListView tripListView;
+
+    // Custom adapter for lists
     private TripListAdapter tripListAdapter;
+
+    // Buttons for merging, and back to main activity page
     private Button backToMainMenuButton;
     private Button mergeSelectedTripsButton;
 
@@ -32,7 +38,7 @@ public class TripActivity extends AppCompatActivity {
         tripListAdapter = new TripListAdapter(this);
         tripListView.setAdapter(tripListAdapter);
 
-        Button backToMainMenuButton = findViewById(R.id.back_to_main_menu_button);
+        backToMainMenuButton = findViewById(R.id.back_to_main_menu_button);
         backToMainMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -41,7 +47,7 @@ public class TripActivity extends AppCompatActivity {
             }
         });
 
-        Button mergeSelectedTripsButton = findViewById(R.id.merge_selected_trips_button);
+        mergeSelectedTripsButton = findViewById(R.id.merge_selected_trips_button);
         mergeSelectedTripsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,6 +57,7 @@ public class TripActivity extends AppCompatActivity {
             }
         });
     }
+
     private void mergeSelectedTrips(List<String> selectedTripStartTimes) {
         // Sort the selected trip start times
         Collections.sort(selectedTripStartTimes);

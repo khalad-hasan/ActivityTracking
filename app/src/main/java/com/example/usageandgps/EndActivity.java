@@ -30,25 +30,44 @@ import java.util.TimerTask;
 
 public class EndActivity extends AppCompatActivity {
 
-    Button btn;
+    // Button to stop service
+    private Button btn;
+
+    // Button to edit trip
+    private Button btnEdit;
+
+    // AlertDialog components to show popups
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
+
+    // Firebase Database reference
+    private DatabaseReference mDatabase;
+
+    // Text fields to display questions and get answers in the popup
+    private EditText first;
+    private TextView textView;
+
+    // String to store the time for popup
+    String timeForPop = "";
+
+    // Buttons to hold submit and cancel for merging
     private Button submit;
     private Button cancel;
-    private DatabaseReference mDatabase;
-    private EditText first;
-    String timeForPop = "";
-    private TextView textView;
+
+    // String to store participationID
     private String data;
-    private int i = 0;
-    private Button btnEdit;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_end);
+
+        // Assign views from layout to variables
         btn = findViewById(R.id.endButton);
         btnEdit = findViewById(R.id.editTrip);
+
+        // Stop the service and go back to MainActivity when button is clicked
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -58,6 +77,7 @@ public class EndActivity extends AppCompatActivity {
             }
         });
 
+        // Go to TripActivity when edit button is clicked
         btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,14 +85,20 @@ public class EndActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // Get participationID
         data = participationID.getText().toString();
+
+        // Initialize Firebase database reference
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-
+        // Fetch TimeForPop from Firebase
         mDatabase.child("TimeForPop").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 timeForPop = snapshot.getValue(String.class);
+
+                // Show popup as many times as there are trips
                 showPopNTimes(timeForPop, tripCount);
             }
 
@@ -83,12 +109,15 @@ public class EndActivity extends AppCompatActivity {
         });
 
     }
+
+    // Show popup 'n' times at the specified time
     public void showPopNTimes(String timeString, int n) {
         if (n > 0) {
             showPop(timeString, n);
         }
     }
 
+    // Show popup at the specified time
     public void showPop(String timeString, int remainingPopups) {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -145,3 +174,5 @@ public class EndActivity extends AppCompatActivity {
     }
 
 }
+
+
